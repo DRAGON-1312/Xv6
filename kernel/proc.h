@@ -1,7 +1,8 @@
 // Saved registers for kernel context switches.
+// During a context switch, the system needs a place to save the necessary state of a process so that it can resume later when needed
 struct context {
-  uint64 ra;
-  uint64 sp;
+  uint64 ra; // ra: return address
+  uint64 sp; // sp: stack pointer
 
   // callee-saved
   uint64 s0;
@@ -18,11 +19,12 @@ struct context {
   uint64 s11;
 };
 
+
 // Per-CPU state.
 struct cpu {
-  struct proc *proc;          // The process running on this cpu, or null.
+  struct proc *proc;          // The process running on this cpu, or null (idle or running the scheduler).
   struct context context;     // swtch() here to enter scheduler().
-  int noff;                   // Depth of push_off() nesting.
+  int noff;                   // Depth of push_off() nesting. 
   int intena;                 // Were interrupts enabled before push_off()?
 };
 
@@ -40,11 +42,12 @@ extern struct cpu cpus[NCPU];
 // the trapframe includes callee-saved user registers like s0-s11 because the
 // return-to-user path via usertrapret() doesn't return through
 // the entire kernel call stack.
+// trapframe lưu toàn bộ trạng thái thanh ghi của user process khi process từ user mode đi vào kernel mode.
 struct trapframe {
   /*   0 */ uint64 kernel_satp;   // kernel page table
   /*   8 */ uint64 kernel_sp;     // top of process's kernel stack
   /*  16 */ uint64 kernel_trap;   // usertrap()
-  /*  24 */ uint64 epc;           // saved user program counter
+  /*  24 */ uint64 epc;           // saved user program counter: Địa chỉ lệnh user đang chạy dở trước khi trap vào kernel.
   /*  32 */ uint64 kernel_hartid; // saved kernel tp
   /*  40 */ uint64 ra;
   /*  48 */ uint64 sp;
@@ -85,23 +88,23 @@ enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 struct proc {
   struct spinlock lock;
 
-  // p->lock must be held when using these:
-  enum procstate state;        // Process state
+  // p->lock must be held when using these: (khi truy cập thì thường phải giữ p->lock.)
+  enum procstate state;        // Current process state
   void *chan;                  // If non-zero, sleeping on chan
   int killed;                  // If non-zero, have been killed
   int xstate;                  // Exit status to be returned to parent's wait
   int pid;                     // Process ID
 
-  // wait_lock must be held when using this:
-  struct proc *parent;         // Parent process
+  // wait_lock must be held when using this (cần wait_lock khi dùng):
+  struct proc *parent;         // Parent process: process này được fork() từ ai.
 
   // these are private to the process, so p->lock need not be held.
   uint64 kstack;               // Virtual address of kernel stack
   uint64 sz;                   // Size of process memory (bytes)
-  pagetable_t pagetable;       // User page table
+  pagetable_t pagetable;       // User page table: Dùng để ánh xạ virtual address sang physical address cho process đó.
   struct trapframe *trapframe; // data page for trampoline.S
-  struct context context;      // swtch() here to run process
-  struct file *ofile[NOFILE];  // Open files
+  struct context context;      // swtch() here to run process: Đây là phần hỗ trợ scheduler đổi qua process này và quay lại.
+  struct file *ofile[NOFILE];  // Open files: Mảng các file đang mở của process.
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 };
