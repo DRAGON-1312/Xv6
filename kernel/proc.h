@@ -107,4 +107,6 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files: Mảng các file đang mở của process.
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+
+  int trace_mask;              // Tracing system calls: if bit i in trace_mask is set, print information about the i-th system call.
 };
