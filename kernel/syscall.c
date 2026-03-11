@@ -170,7 +170,7 @@ syscall(void)
       // means if the n-th bit of trace_mask is set 
       // and the corresponding system call is called,
       // then print the information about that system call.
-      printf("%d: syscall %s -> %d\n",
+      printf("%d: syscall %s -> %ld\n",
               p->pid,
               syscallnames[num],
               p->trapframe->a0);
