@@ -14,7 +14,13 @@ main(void)
   
   printf("Process: %s\n", info.name);
   printf("PID: %d, PPID: %d\n", info.pid, info.ppid);
-  printf("State: %d\n", info.state);
+  if (info.state == 0) printf("State: UNUSED\n");
+  else if (info.state == 1) printf("State: USED\n");
+  else if (info.state == 2) printf("State: SLEEPING\n");
+  else if (info.state == 3) printf("State: RUNNABLE\n");
+  else if (info.state == 4) printf("State: RUNNING\n");
+  else if (info.state == 5) printf("State: ZOMBIE\n");
+  else printf("State: UNKNOWN\n");
   printf("Memory: %d bytes\n", (int)info.sz);
   
   exit(0);
