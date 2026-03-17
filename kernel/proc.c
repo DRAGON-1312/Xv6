@@ -695,3 +695,36 @@ procdump(void)
     printf("\n");
   }
 }
+
+int 
+getprocinfo(int pid, uint64 uaddr)
+{
+  struct proc *p;
+  struct procinfo info;
+  
+  for (p = proc; p < &proc[NPROC]; p++) { // Traverse the entire process table to find the matching pid
+    acquire(&p->lock); // Hold the lock when reading process information for safety
+    
+    if (p->state != UNUSED && p->pid == pid) {
+      info.pid = p->pid;
+      info.state = p->state;
+      info.sz = p->sz;
+      safestrcpy(info.name, p->name, sizeof(info.name));
+      
+      acquire(&wait_lock);
+      info.ppid = (p->parent ? p->parent->pid : 0);
+      release(&wait_lock);
+      
+      release(&p->lock); // Thả lock sau khi đọc xong
+      
+      if (copyout(myproc()->pagetable, uaddr, (char *)&info, sizeof(info)) < 0)
+        return -1;
+        
+      return 0; // success
+    }
+    
+    release(&p->lock); // Không khớp PID → thả lock
+  }
+  
+  return -1; // Do not find the PID
+}

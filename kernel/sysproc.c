@@ -100,3 +100,15 @@ sys_trace(void)
   myproc()->trace_mask = mask;
   return 0;
 }
+
+uint64
+sys_procinfo(void)
+{
+  int pid;
+  uint64 addr;
+
+  argint(0, &pid);
+  argaddr(1, &addr);
+
+  return getprocinfo(pid, addr);
+}
