@@ -30,6 +30,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int trace(int);
 int procinfo(int pid, struct procinfo *info);
 
 // ulib.c

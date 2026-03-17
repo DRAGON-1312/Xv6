@@ -93,6 +93,15 @@ sys_uptime(void)
 }
 
 uint64
+sys_trace(void)
+{
+  int mask;
+  argint(0, &mask);
+  myproc()->trace_mask = mask;
+  return 0;
+}
+
+uint64
 sys_procinfo(void)
 {
   int pid;

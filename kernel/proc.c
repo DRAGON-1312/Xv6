@@ -322,6 +322,8 @@ fork(void)
   np->state = RUNNABLE;
   release(&np->lock);
 
+  np->trace_mask = p->trace_mask; // Inherit trace mask from parent. (For TRACING syscall)
+
   return pid;
 }
 
