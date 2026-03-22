@@ -9,7 +9,7 @@ printf(" ");
 }
 }
 
-void tree(char *path, int depth) {
+void tree(char *path, char *name, int depth) {
 int fd;
 struct stat st;
 struct dirent de;
@@ -28,13 +28,13 @@ return;
 
 if(st.type != T_DIR){
 printIndent(depth);
-printf("%s\n", path);
+printf("%s\n", name);
 close(fd);
 return;
 }
 
 printIndent(depth);
-printf("%s/\n", path);
+printf("%s/\n", name);
 
 if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
 printf("tree: path too long\n");
@@ -63,7 +63,7 @@ continue;
 }
 
 if(st2.type == T_DIR){
-tree(buf, depth + 1);
+tree(buf, de.name, depth + 1);
 } else {
 printIndent(depth + 1);
 printf("%s\n", de.name);
@@ -75,9 +75,9 @@ close(fd);
 
 int main(int argc, char *argv[]) {
 if(argc == 1){
-tree(".", 0);
+tree(".", ".", 0);
 } else {
-tree(argv[1], 0);
+tree(argv[1], argv[1], 0);
 }
 exit(0);
 }
